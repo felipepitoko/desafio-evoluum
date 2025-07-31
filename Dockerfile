@@ -18,8 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application's code into the container at /app
 COPY . .
 
-# Make the entrypoint script executable and change ownership of all files to the app user
-RUN chmod +x ./entrypoint.sh && chown -R app:app .
+# Convert line endings, make the entrypoint script executable, and change ownership
+RUN sed -i 's/\r$//' ./entrypoint.sh \
+    && chmod +x ./entrypoint.sh && chown -R app:app .
 
 # Switch to the non-root user
 USER app
