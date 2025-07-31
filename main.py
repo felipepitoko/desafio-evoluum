@@ -1,21 +1,19 @@
-import logging
 from fastapi import FastAPI
-from routes import users, notes
+from fastapi.staticfiles import StaticFiles
 
-# Configure logging (can be moved to a central config file later)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+from logging_config import setup_logging
+from routes import users, notes, auth
 
-# Create FastAPI app instance
+setup_logging()
+
 app = FastAPI(
     title="Notes API",
     description="A simple API to manage users and their notes.",
     version="1.0.0"
 )
 
-# Include routers from other files
 app.include_router(users.router)
 app.include_router(notes.router)
+app.include_router(auth.router)
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

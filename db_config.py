@@ -2,14 +2,6 @@ import logging
 import psycopg2
 from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT, POSTGRES_HOST
 
-# Configure logging to provide formatted, timestamped output
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
-# Get a logger for this specific module
 logger = logging.getLogger(__name__)
 
 def get_db_connection():
@@ -77,6 +69,11 @@ def create_tables():
             conn.close()
 
 if __name__ == '__main__':
+    # When running this script directly, configure a basic logger to see output.
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
     # This allows the script to be run directly to set up the database.
     logger.info("Initializing database...")
     create_tables()

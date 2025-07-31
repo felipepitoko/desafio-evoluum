@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Notas</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Notes App</h1>
+
+        <!-- Login Section -->
+        <div id="login-section">
+            <h2>Login</h2>
+            <form id="login-form">
+                <p>Digite seu nome de usuário para começar. Se não existir, será criado.</p>
+                <input type="text" id="username" placeholder="Seu Nome de Usuário" required>
+                <button type="submit">Entrar / Registrar</button>
+            </form>
+            <p id="login-error" class="error-message"></p>
+        </div>
+
+        <!-- App Section (hidden by default) -->
+        <div id="app-section" style="display: none;">
+            <h2 id="welcome-message"></h2>
+
+            <!-- Button to toggle the form visibility -->
+            <button id="show-create-note-btn">Criar Nova Nota</button>
+
+            <!-- Create Note Form (now hidden by default) -->
+            <div id="create-note-container" class="form-container" style="display: none;">
+                <h3>Criar Nova Nota</h3>
+                <form id="create-note-form">
+                    <input type="text" id="note-title" placeholder="Título da Nota" required>
+                    <textarea id="note-description" placeholder="Descrição da Nota"></textarea>
+                    <input type="text" id="note-tags" placeholder="Tags (separadas por vírgula)">
+                    <button type="submit">Criar Nota</button>
+                </form>
+            </div>
+
+            <h3>Suas Notas</h3>
+            <div id="notes-list">
+            </div>
+        </div>
+    </div>
+    <script src="/app.js"></script>
+</body>
+</html>
