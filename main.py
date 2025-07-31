@@ -1,6 +1,8 @@
 import logging
 from fastapi import FastAPI
-from routes import users, notes
+from fastapi.staticfiles import StaticFiles
+
+from routes import users, notes, auth
 
 # Configure logging (can be moved to a central config file later)
 logging.basicConfig(
@@ -19,3 +21,8 @@ app = FastAPI(
 # Include routers from other files
 app.include_router(users.router)
 app.include_router(notes.router)
+app.include_router(auth.router)
+
+# Mount the static directory to serve frontend files (HTML, JS, CSS).
+# The `html=True` argument makes it serve `index.html` for the root path.
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

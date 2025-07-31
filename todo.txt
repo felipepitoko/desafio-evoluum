@@ -1,0 +1,9 @@
+#Essencial
+- Criar estrutura docker para bd
+- Criar funções de interação com o bd
+- Criar API para consumir essas funções
+
+#Extras
+- Criar frontend para utilizar o APP
+- Estrutura de container para a aplicação inteira
+- Deploy em nuve
