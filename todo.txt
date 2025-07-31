@@ -6,4 +6,4 @@
 #Extras
 - Criar frontend para utilizar o APP
 - Estrutura de container para a aplicação inteira
-- Deploy em nuve
+- Deploy em nuvem
