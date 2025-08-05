@@ -2,11 +2,12 @@ import logging
 from typing import List, Optional, Dict, Any
 
 import db_handler
+from database.db_handler import DBHandler
 
 logger = logging.getLogger(__name__)
 
 
-def get_all_usernames_service() -> List[str]:
+def get_all_usernames_service(db_handler: DBHandler) -> List[str]:
     """Service to retrieve all usernames."""
     return db_handler.get_all_usernames()
 
