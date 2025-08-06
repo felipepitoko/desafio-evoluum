@@ -1,26 +1,11 @@
 import logging
 import psycopg2
-from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT, POSTGRES_HOST
+
+from database.connection import start_conn
 
 logger = logging.getLogger(__name__)
 
-def get_db_connection():
-    """Establishes and returns a connection to the PostgreSQL database."""
-    try:
-        conn = psycopg2.connect(
-            dbname=POSTGRES_DB,
-            user=POSTGRES_USER,
-            password=POSTGRES_PASSWORD,
-            host=POSTGRES_HOST,
-            port=POSTGRES_PORT
-        )
-        return conn
-    except psycopg2.OperationalError as e:
-        # Log the exception with traceback for detailed debugging
-        logger.error("Could not connect to the database. Is it running?", exc_info=True)
-        return None
-
-def create_tables():
+def create_tables(conn: psycopg2.extensions.connection):
     """Creates the users and notes tables in the database if they don't exist."""
     commands = (
         """
@@ -46,8 +31,7 @@ def create_tables():
         )
         """
     )
-
-    conn = get_db_connection()
+    
     if not conn:
         # get_db_connection already logged the error, so we just exit gracefully.
         return
@@ -63,10 +47,6 @@ def create_tables():
     except psycopg2.Error as e:
         # The 'with conn' block will have already rolled back the transaction.
         logger.error("Failed to create tables.", exc_info=True)
-    finally:
-        # Ensure the connection is always closed.
-        if conn:
-            conn.close()
 
 if __name__ == '__main__':
     # When running this script directly, configure a basic logger to see output.
@@ -74,7 +54,13 @@ if __name__ == '__main__':
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    # This allows the script to be run directly to set up the database.
     logger.info("Initializing database...")
-    create_tables()
+    conn = start_conn()
+    # This allows the script to be run directly to set up the database,
+    # managing its own connection lifecycle.
+    if conn:
+        try:
+            create_tables(conn)
+        finally:
+            conn.close()
     logger.info("Database initialization complete.")

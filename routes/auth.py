@@ -24,8 +24,6 @@ async def login_for_access_token(
             detail="Username cannot be empty",
         )
 
-    # Use the service layer to handle the logic of finding or creating a user.
-    # This is a better practice than calling the db_handler directly from the router.
     user = users_service.login_or_create_user_service(_db, username)
 
     if not user:

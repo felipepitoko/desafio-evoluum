@@ -2,7 +2,6 @@ import psycopg2
 import logging
 
 from config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT, POSTGRES_HOST
-from .db_handler import DBHandler
 
 logger = logging.getLogger(__name__)
 
