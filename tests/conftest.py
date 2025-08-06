@@ -1,11 +1,12 @@
-# app/tests/conftest.py
 import pytest
 import psycopg2
 from psycopg2.extensions import connection
 from fastapi.testclient import TestClient
+from typing import Dict, Any
 
 # Importa as variáveis de configuração separadas para o banco de dados de teste
 from config import (
+    SECRET_TOKEN,
     TEST_POSTGRES_DB,
     TEST_POSTGRES_HOST,
     TEST_POSTGRES_PASSWORD,
@@ -55,3 +56,21 @@ def client_fixture(db_handler_test_instance: DBHandler):
         
     # Limpa as sobrescritas após o teste para evitar efeitos colaterais
     app.dependency_overrides.clear()
+
+@pytest.fixture(name="authenticated_user")
+def authenticated_user_fixture(db_handler_test_instance: DBHandler) -> Dict[str, Any]:
+    """
+    Creates a test user in the database and returns their ID and auth headers.
+
+    Yields:
+        A dictionary containing the user's ID and a dict with authorization headers.
+    """
+    username = "testuser"
+    user = db_handler_test_instance.create_user(username)
+    user_id = user["user_id"]
+    token = f"{SECRET_TOKEN} id={user_id}"
+    
+    return {
+        "user_id": user_id,
+        "auth_headers": {"Authorization": f"{token}"}
+    }
