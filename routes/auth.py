@@ -3,10 +3,15 @@ from models.users_model import UserLoginRequest, LoginResponse
 from services import users_service
 from config import SECRET_TOKEN
 
+from .dependencies import DBHandlerInstance
+
 router = APIRouter()
 
 @router.post("/login", response_model=LoginResponse, tags=["Authentication"])
-async def login_for_access_token(form_data: UserLoginRequest):
+async def login_for_access_token(
+    form_data: UserLoginRequest,
+    _db: DBHandlerInstance
+    ):
     """
     Logs in a user by username.
     If the user doesn't exist, it will be created.
@@ -19,9 +24,7 @@ async def login_for_access_token(form_data: UserLoginRequest):
             detail="Username cannot be empty",
         )
 
-    # Use the service layer to handle the logic of finding or creating a user.
-    # This is a better practice than calling the db_handler directly from the router.
-    user = users_service.login_or_create_user_service(username)
+    user = users_service.login_or_create_user_service(_db, username)
 
     if not user:
         raise HTTPException(

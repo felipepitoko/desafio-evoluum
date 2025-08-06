@@ -1,12 +1,12 @@
 import logging
 from typing import List, Optional, Dict, Any
 
-import db_handler
+from database.db_handler import DBHandler
 
 logger = logging.getLogger(__name__)
 
 
-def create_note_for_user_service(user_id: int, note_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def create_note_for_user_service(_db: DBHandler, user_id: int, note_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Service to create a new note for a user.
 
@@ -15,19 +15,19 @@ def create_note_for_user_service(user_id: int, note_data: Dict[str, Any]) -> Opt
     - If the user exists, it creates the note and returns it.
     """
     # 1. Validate that the user from the token exists in the database.
-    if not db_handler.get_user_by_id(user_id):
+    if not _db.get_user_by_id(user_id):
         logger.warning(f"Service: Attempt to create note for non-existent user_id: {user_id}")
         return None
 
     # 2. Create the note.
-    return db_handler.create_note(
+    return _db.create_note(
         user_id=user_id,
         title=note_data["note_title"],
         description=note_data.get("note_description"),
         tags=note_data.get("note_tags")
     )
 
-def update_note_service(user_id: int, note_id: int, note_data: Dict[str, Any]) -> Optional[Any]:
+def update_note_service(_db: DBHandler, user_id: int, note_id: int, note_data: Dict[str, Any]) -> Optional[Any]:
     """
     Service to update an existing note.
 
@@ -40,12 +40,12 @@ def update_note_service(user_id: int, note_id: int, note_data: Dict[str, Any]) -
         - None on other database errors.
     """
     # 1. Validate that the user from the token exists in the database.
-    if not db_handler.get_user_by_id(user_id):
+    if not _db.get_user_by_id(user_id):
         logger.warning(f"Service: Attempt to update note for non-existent user_id: {user_id}")
         return "user_not_found"
 
     # 2. Validate that the note exists and the user owns it.
-    note = db_handler.get_note_by_id(note_id)
+    note = _db.get_note_by_id(note_id)
     if not note or note.get("user_id") != user_id:
         logger.warning(f"Service: Update access denied for note {note_id} by user {user_id}.")
         # Combine "not found" and "permission denied" to prevent leaking information.
@@ -57,9 +57,9 @@ def update_note_service(user_id: int, note_id: int, note_data: Dict[str, Any]) -
         return note
 
     # 4. Perform the update.
-    return db_handler.update_note(note_id, note_data)
+    return _db.update_note(note_id, note_data)
 
-def delete_note_service(user_id: int, note_id: int) -> str:
+def delete_note_service(_db: DBHandler, user_id: int, note_id: int) -> str:
     """
     Service to delete an existing note.
 
@@ -72,19 +72,19 @@ def delete_note_service(user_id: int, note_id: int) -> str:
         - "error" on other database errors.
     """
     # 1. Validate that the user from the token exists in the database.
-    if not db_handler.get_user_by_id(user_id):
+    if not _db.get_user_by_id(user_id):
         logger.warning(f"Service: Attempt to delete note for non-existent user_id: {user_id}")
         return "user_not_found"
 
     # 2. Validate that the note exists and the user owns it.
-    note = db_handler.get_note_by_id(note_id)
+    note = _db.get_note_by_id(note_id)
     if not note or note.get("user_id") != user_id:
         logger.warning(f"Service: Delete access denied for note {note_id} by user {user_id}.")
         return "note_not_found"
 
     # 3. Perform the deletion.
-    return "success" if db_handler.delete_note(note_id) else "error"
+    return "success" if _db.delete_note(note_id) else "error"
 
-def get_notes_by_user_id_service(user_id: int) -> List[Dict[str, Any]]:
+def get_notes_by_user_id_service(_db: DBHandler, user_id: int) -> List[Dict[str, Any]]:
     """Service to retrieve all notes for a given user ID."""
-    return db_handler.get_notes_by_user_id(user_id)
+    return _db.get_notes_by_user_id(user_id)

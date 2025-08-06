@@ -89,3 +89,20 @@ Após a inicialização, os serviços estarão disponíveis nos seguintes endere
   1. Escolha um nome de usuário (para fins de demonstração, serve apenas para separar as notas de cada usuário)
   2. Crie uma nova nota
   3. Edite ou exclua suas notas criadas
+
+## Executando os Testes
+
+Para executar a suíte de testes automatizados, primeiro instale as dependências de desenvolvimento:
+
+```sh
+pip install -r requirements-dev.txt
+```
+
+Em seguida, execute o Pytest na raiz do projeto:
+
+```sh
+pytest
+```
+  1. Escolha um nome de usuário (para fins de demonstração, serve apenas para separar as notas de cada usuário)
+  2. Crie uma nova nota
+  3. Edite ou exclua suas notas criadas

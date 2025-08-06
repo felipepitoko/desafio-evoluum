@@ -7,3 +7,11 @@
 - Criar frontend para utilizar o APP
 - Estrutura de container para a aplicação inteira
 - Deploy em nuvem
+
+#Testes
+- Injetar conexão do bd via routes
+- criar classe para o BD
+- criar classe do BD testes
+- testar injeção
+- criar fixtures
+- criar testes para todas as rotas

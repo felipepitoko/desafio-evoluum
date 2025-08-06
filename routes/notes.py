@@ -1,24 +1,27 @@
 import logging
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from services import notes_service
+from .dependencies import AuthenticatedUserID
+from .dependencies import DBHandlerInstance
 from models.notes_model import Note, NoteCreate, NoteUpdate
-from security import verify_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.get("/notes/", response_model=List[Note], tags=["Notes"])
-def get_my_notes_api(user_id: int = Depends(verify_token)):
+@router.get("/notes", response_model=List[Note], tags=["Notes"])
+def get_my_notes_api(
+    user_id: AuthenticatedUserID,
+    _db: DBHandlerInstance
+    ):
     """
     Retrieve all notes for the authenticated user.
     Returns 404 if no notes are found.
     """
     logger.info(f"API: Request received for notes of user_id: {user_id}")
-    # The user is implicitly identified by the token.
-    notes = notes_service.get_notes_by_user_id_service(user_id)
+    notes = notes_service.get_notes_by_user_id_service(_db, user_id)
 
     if not notes:
         raise HTTPException(
@@ -27,10 +30,11 @@ def get_my_notes_api(user_id: int = Depends(verify_token)):
         )
     return notes
 
-@router.post("/notes/", response_model=Note, status_code=status.HTTP_201_CREATED, tags=["Notes"])
+@router.post("/notes", response_model=Note, status_code=status.HTTP_201_CREATED, tags=["Notes"])
 def create_new_note_api(
     note_data: NoteCreate,
-    user_id: int = Depends(verify_token)
+    user_id: AuthenticatedUserID,
+    _db: DBHandlerInstance
 ):
     """
     Creates a new note for the authenticated user.
@@ -40,13 +44,12 @@ def create_new_note_api(
     """
     logger.info(f"API: Request to create note for user_id: {user_id}")
 
-    new_note = notes_service.create_note_for_user_service(user_id, note_data.model_dump())
+    new_note = notes_service.create_note_for_user_service(_db, user_id, note_data.model_dump())
 
     if not new_note:
-        # This indicates the user_id from the token was not found.
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not create note: check user credentials."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not create note."
         )
     return new_note
 
@@ -54,7 +57,8 @@ def create_new_note_api(
 def update_note_api(
     note_id: int,
     note_data: NoteUpdate,
-    user_id: int = Depends(verify_token)
+    user_id: AuthenticatedUserID,
+    _db: DBHandlerInstance
 ):
     """
     Updates an existing note for the authenticated user.
@@ -64,12 +68,10 @@ def update_note_api(
     """
     logger.info(f"API: Request to update note {note_id} for user_id: {user_id}")
 
-    # Use exclude_unset=True to only include fields provided in the request.
-    # This allows for partial updates (PATCH-like behavior).
     update_data = note_data.model_dump(exclude_unset=True)
 
     result = notes_service.update_note_service(
-        user_id=user_id, note_id=note_id, note_data=update_data
+        _db, user_id=user_id, note_id=note_id, note_data=update_data
     )
 
     if result == "user_not_found":
@@ -80,7 +82,7 @@ def update_note_api(
     if result == "note_not_found":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Note with id {note_id} not found or access denied."
+            detail=f"Note with id {note_id} not found."
         )
     if not isinstance(result, dict):
         raise HTTPException(
@@ -93,7 +95,8 @@ def update_note_api(
 @router.delete("/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Notes"])
 def delete_note_api(
     note_id: int,
-    user_id: int = Depends(verify_token)
+    user_id: AuthenticatedUserID,
+    _db: DBHandlerInstance
 ):
     """
     Deletes a note for the authenticated user.
@@ -104,7 +107,7 @@ def delete_note_api(
     """
     logger.info(f"API: Request to delete note {note_id} for user_id: {user_id}")
 
-    result = notes_service.delete_note_service(user_id=user_id, note_id=note_id)
+    result = notes_service.delete_note_service(_db, user_id=user_id, note_id=note_id)
 
     if result == "user_not_found":
         raise HTTPException(
@@ -121,6 +124,5 @@ def delete_note_api(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not delete note due to a server error."
         )
-
-    # A 204 response should not have a body, so we return None.
+        
     return None
