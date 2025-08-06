@@ -6,7 +6,7 @@ from .db_handler import DBHandler
 
 logger = logging.getLogger(__name__)
 
-def start_conn():
+def start_conn()-> psycopg2.extensions.connection:
     """Establishes and returns a self.connection to the PostgreSQL database."""
     try:
         conn = psycopg2.connect(
@@ -22,13 +22,6 @@ def start_conn():
         logger.error("Could not self.connect to the database. Is it running?", exc_info=True)
         return None
     
-def get_db_handler():
-    conn = start_conn()
-    try:
-        yield DBHandler(conn)
-    finally:
-        if conn:
-            logging.info("Closing database connection.")
-            conn.close()
+
     
     
